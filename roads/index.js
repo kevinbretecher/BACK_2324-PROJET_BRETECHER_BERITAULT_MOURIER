@@ -28,8 +28,8 @@ router.post('/login',async (req,res) => {
 });
 
 router.post('/signup', async (req, res) => {
-    const { email, password, name, lastname, birthdate, status, avatar, username } = req.body;
-
+    const { email, password, name, firstname, birthdate, status, avatar, username } = req.body;
+    console.log(req.body);
     try {
         const [existingUserByEmail, existingUserByUsername] = await Promise.all([
             database.getUserByEmail(email),
@@ -51,9 +51,8 @@ router.post('/signup', async (req, res) => {
             email,
             password: hashedPassword,
             name,
-            lastname,
+            firstname,
             birthdate,
-            status: "online",
             avatar: `/images/${avatarFileName}`,
             username,
             admin: false

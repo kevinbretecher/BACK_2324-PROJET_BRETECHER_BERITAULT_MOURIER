@@ -1,5 +1,6 @@
 const express = require('express');
 const app = express();
+const cors = require('cors');
 require('dotenv').config();
 const port = process.env.PORT;
 
@@ -12,6 +13,7 @@ app.use(bodyParser.urlencoded({ extended: true }));
 
 app.use(morgan('tiny'));
 app.use(express.static("public"));
+app.use(cors());
 
 const indexRouter = require(path.join(__dirname,"roads/index.js"));
 //const eventsRouter = require(path.join(__dirname,"roads/events.js"));
