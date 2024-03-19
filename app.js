@@ -6,6 +6,10 @@ const port = process.env.PORT;
 const morgan = require('morgan');
 const path = require('path');
 
+const bodyParser = require('body-parser');
+app.use(bodyParser.json());
+app.use(bodyParser.urlencoded({ extended: true }));
+
 app.use(morgan('tiny'));
 app.use(express.static("public"));
 

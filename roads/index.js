@@ -28,6 +28,7 @@ router.post('/login',async (req,res) => {
 });
 
 router.post('/signup', async (req, res) => {
+    console.log(req.body);
     const { email, password, name, lastname, birthdate, status, avatar, username } = req.body;
 
     try {
@@ -43,9 +44,9 @@ router.post('/signup', async (req, res) => {
         const hashedPassword = await bcrypt.hash(password, 10);
 
         const avatarFileName = `${username}_${Date.now()}.png`;
-        const avatarPath = path.join(__dirname, '../public/images', avatarFileName);
-        const base64Data = avatar.replace(/^data:image\/png;base64,/, '');
-        fs.writeFileSync(avatarPath, base64Data, 'base64');
+        //const avatarPath = path.join(__dirname, '../public/images', avatarFileName);
+        //const base64Data = avatar.replace(/^data:image\/png;base64,/, '');
+        //fs.writeFileSync(avatarPath, base64Data, 'base64');
 
         const newUser = {
             email,

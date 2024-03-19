@@ -59,7 +59,7 @@ async function addUser(newUser) {
     const db = client.db(dbName);
     const usersCollection = db.collection('users');
     try {
-        await usersCollection.insertOne(newUser);
+        return await usersCollection.insertOne(newUser);
     }
     catch (err) {
         console.error(err);
