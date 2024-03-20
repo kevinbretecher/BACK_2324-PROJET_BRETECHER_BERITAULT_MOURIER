@@ -25,7 +25,7 @@ router.post('/login',async (req,res) => {
         }
         const token = jwt.sign({userId: user._id},secret,{expiresIn:'1h'});
         res.cookie('authToken',token,{httpOnly:true,secure:true});
-        res.json({ username: user.username });
+        res.json({ username: user.username, token });
     }
 });
 
@@ -54,12 +54,12 @@ router.post('/signup', async (req, res) => {
             admin: false
         };
 
-        const createdUser = await database.addUser(newUser);
-
+        await database.addUser(newUser);
+        const createdUser = await database.getUserByEmail(newUser.email);
         const token = jwt.sign({ userId: createdUser._id }, secret, { expiresIn: '1h' });
 
         res.status(201).cookie('authToken',token,{httpOnly:true,secure:true});
-        res.json({ username: newUser.username });
+        res.json({ username: createdUser.username, token });
     }
     catch (err) {
         res.status(500).json({ error: 'Internal server error' });
@@ -73,14 +73,21 @@ router.get('/profile',authenticateToken,async (req,res) => {
 
 router.post('/profile',authenticateToken,async (req,res) => {
     try {
-        const {avatar} = req.body;
-        const avatarFileName = `${req.decoded.userId}.png`;
+        const { avatar } = req.body;
+        const userId = req.decoded.userId;
+
+        // /!\ Le problème est que ça n'accepte ques les .png et pas tous /!\
+        // /!\ Le deuxième problème est que le payload des nouvelles images est généralement trop élevé /!\
+        const avatarFileName = `${userId}.png`;
         const avatarPath = path.join(__dirname, '../public/images', avatarFileName);
         const base64Data = avatar.replace(/^data:image\/png;base64,/, '');
         fs.writeFileSync(avatarPath, base64Data, 'base64');
-        res.json(database.editAvatar(req.decoded.userId, avatarPath));
-    }
-    catch (err) {
+
+        const newAvatarUrl = `/images/${avatarFileName}`;
+        await database.editAvatar(userId, newAvatarUrl);
+
+        res.json({ newAvatarUrl });
+    } catch (err) {
         console.error('Error updating avatar:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
