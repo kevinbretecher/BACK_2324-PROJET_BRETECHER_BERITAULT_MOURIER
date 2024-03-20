@@ -6,7 +6,6 @@ const dbName = process.env.DBNAME;
 async function clientConnect(){
     const client = new MongoClient(url);
     await client.connect();
-    console.log(`Connected successfully to MongoDB server: ${url}`);
     return client;
 }
 async function getUserById(userId){
@@ -54,6 +53,21 @@ async function getUserByUsername(username){
     }
 }
 
+async function getUserInfoById(userId){
+    const client = await clientConnect()
+    const db = client.db(dbName);
+    const usersCollection = db.collection('users');
+    try {
+        return await usersCollection.findOne({_id: new ObjectID(userId)},{projection: {password: 0}});
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+}
+
 async function addUser(newUser) {
     const client = await clientConnect();
     const db = client.db(dbName);
@@ -69,4 +83,4 @@ async function addUser(newUser) {
     }
 }
 
-module.exports = {getUserById,getUserByEmail,getUserByUsername,addUser};
+module.exports = {getUserById,getUserByEmail,getUserByUsername,getUserInfoById,addUser};

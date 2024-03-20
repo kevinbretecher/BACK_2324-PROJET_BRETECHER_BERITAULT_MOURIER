@@ -6,6 +6,7 @@ const jwt = require('jsonwebtoken');
 const database = require("../database.js")
 const fs = require('fs');
 const path = require('path');
+const authenticateToken = require("../middlewares/authenticateToken")
 const router = express.Router();
 
 const secret = process.env.SECRET
@@ -42,7 +43,7 @@ router.post('/signup', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        const avatarFileName = `${username}_${Date.now()}.png`;
+        //const avatarFileName = `${username}_${Date.now()}.png`;
         //const avatarPath = path.join(__dirname, '../public/images', avatarFileName);
         //const base64Data = avatar.replace(/^data:image\/png;base64,/, '');
         //fs.writeFileSync(avatarPath, base64Data, 'base64');
@@ -53,7 +54,7 @@ router.post('/signup', async (req, res) => {
             name,
             firstname,
             birthdate,
-            avatar: `/images/${avatarFileName}`,
+            avatar: "/images/default.png",
             username,
             admin: false
         };
@@ -73,8 +74,9 @@ router.post('/signup', async (req, res) => {
 });
 
 
-router.get('/profile',async (req,res) => {
-
+router.get('/profile',authenticateToken,async (req,res) => {
+    const userId = req.decoded.userId;
+    res.json(await database.getUserInfoById(userId));
 });
 
 module.exports = router;
