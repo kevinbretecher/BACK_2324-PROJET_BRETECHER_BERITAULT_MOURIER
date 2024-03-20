@@ -31,7 +31,6 @@ router.post('/login',async (req,res) => {
 
 router.post('/signup', async (req, res) => {
     const { email, password, name, firstname, birthdate, username } = req.body;
-    console.log(req.body);
     try {
         const [existingUserByEmail, existingUserByUsername] = await Promise.all([
             database.getUserByEmail(email),
@@ -44,11 +43,6 @@ router.post('/signup', async (req, res) => {
 
         const hashedPassword = await bcrypt.hash(password, 10);
 
-        //const avatarFileName = `${username}_${Date.now()}.png`;
-        //const avatarPath = path.join(__dirname, '../public/images', avatarFileName);
-        //const base64Data = avatar.replace(/^data:image\/png;base64,/, '');
-        //fs.writeFileSync(avatarPath, base64Data, 'base64');
-
         const newUser = {
             email,
             password: hashedPassword,
@@ -60,25 +54,36 @@ router.post('/signup', async (req, res) => {
             admin: false
         };
 
-        // Add the new user to the database
         const createdUser = await database.addUser(newUser);
 
-        // Generate JWT token
         const token = jwt.sign({ userId: createdUser._id }, secret, { expiresIn: '1h' });
 
-        // Send the token in the response
         res.status(201).cookie('authToken',token,{httpOnly:true,secure:true});
         res.json({ username: newUser.username });
-    } catch (error) {
-        console.error('Error during signup:', error);
+    }
+    catch (err) {
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
-
 router.get('/profile',authenticateToken,async (req,res) => {
     const userId = req.decoded.userId;
     res.json(await database.getUserInfoById(userId));
+});
+
+router.post('/profile',authenticateToken,async (req,res) => {
+    try {
+        const {avatar} = req.body;
+        const avatarFileName = `${req.decoded.userId}.png`;
+        const avatarPath = path.join(__dirname, '../public/images', avatarFileName);
+        const base64Data = avatar.replace(/^data:image\/png;base64,/, '');
+        fs.writeFileSync(avatarPath, base64Data, 'base64');
+        res.json(database.editAvatar(req.decoded.userId, avatarPath));
+    }
+    catch (err) {
+        console.error('Error updating avatar:', err);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 module.exports = router;

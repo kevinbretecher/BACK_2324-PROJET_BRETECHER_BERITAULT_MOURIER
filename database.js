@@ -83,4 +83,20 @@ async function addUser(newUser) {
     }
 }
 
-module.exports = {getUserById,getUserByEmail,getUserByUsername,getUserInfoById,addUser};
+async function editAvatar(userId,avatarPath){
+    const client = await clientConnect()
+    const db = client.db(dbName);
+    const usersCollection = db.collection('users');
+    try {
+        await usersCollection.updateOne({_id: new ObjectId(userId)}, {$set: {avatar: avatarPath}});
+        return await usersCollection.findOne({_id: new ObjectId(userId)}, {projection: {password: 0}});
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+}
+
+module.exports = {getUserById,getUserByEmail,getUserByUsername,getUserInfoById,addUser,editAvatar};
