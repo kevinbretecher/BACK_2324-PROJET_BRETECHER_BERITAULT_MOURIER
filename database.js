@@ -99,4 +99,97 @@ async function editAvatar(userId,avatarPath){
     }
 }
 
-module.exports = {getUserById,getUserByEmail,getUserByUsername,getUserInfoById,addUser,editAvatar};
+
+
+async function getAllEvents(){
+    const client = await clientConnect()
+    const db = client.db(dbName);
+    const eventsCollection = db.collection('events');
+    try {
+        return await eventsCollection.find().toArray();
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+}
+
+async function getEventById(eventId){
+    const client = await clientConnect()
+    const db = client.db(dbName);
+    const eventsCollection = db.collection('events');
+    try {
+        return await eventsCollection.findOne({_id: new ObjectId(eventId)});
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+}
+
+async function addEvent(newEvent){
+    const client = await clientConnect();
+    const db = client.db(dbName);
+    const eventsCollection = db.collection('events');
+    try {
+        return await eventsCollection.insertOne(newEvent);
+    }
+    catch (err) {
+        console.error(err);
+    }
+    finally {
+        await client.close();
+    }
+}
+
+async function editEventById(editedEvent){
+    const client = await clientConnect();
+    const db = client.db(dbName);
+    const eventsCollection = db.collection('events');
+    try {
+        return await eventsCollection.updateOne({_id: ObjectId(updatedEvent._id)},{$set: updatedEvent});
+    }
+    catch (err) {
+        console.error(err);
+    }
+    finally {
+        await client.close();
+    }
+}
+
+async function deleteEventById(eventId){
+    const client = await clientConnect();
+    const db = client.db(dbName);
+    const eventsCollection = db.collection('events');
+    try {
+        return await eventsCollection.deleteOne({ _id: new ObjectId(eventId) });
+    }
+    catch (err) {
+        console.error(err);
+    }
+    finally {
+        await client.close();
+    }
+}
+
+async function getEventOwnerById(eventId) {
+    const client = await clientConnect();
+    const db = client.db(dbName);
+    const eventsCollection = db.collection('events');
+    try {
+        const event = await eventsCollection.findOne({_id: new ObjectId(eventId)}, {projection: {ownerId: 1, _id: 0 }});
+        return event.ownerId;
+    }
+    catch (err) {
+        console.error(err);
+    }
+    finally {
+        await client.close();
+    }
+}
+
+module.exports = {getUserById,getUserByEmail,getUserByUsername,getUserInfoById,addUser,editAvatar,getAllEvents,getEventById,addEvent,editEventById,deleteEventById,getEventOwnerById};

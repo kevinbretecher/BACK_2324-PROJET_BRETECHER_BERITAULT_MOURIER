@@ -16,9 +16,9 @@ app.use(express.static("public"));
 app.use(cors());
 
 const indexRouter = require(path.join(__dirname,"roads/index.js"));
-//const eventsRouter = require(path.join(__dirname,"roads/events.js"));
+const eventsRouter = require(path.join(__dirname,"roads/events.js"));
 app.use("/", indexRouter);
-//app.use("/events", eventsRouter);
+app.use("/events", eventsRouter);
 
 //app.get('/:name',(req,res) => {
 //    res.send('Hello, '+ req.params.name + '!');
