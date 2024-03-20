@@ -24,7 +24,8 @@ router.post('/login',async (req,res) => {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
         const token = jwt.sign({userId: user._id},secret,{expiresIn:'1h'});
-        res.json({token});
+        res.cookie('authToken',token,{httpOnly:true,secure:true});
+        res.json({token,user});
     }
 });
 
@@ -54,7 +55,7 @@ router.post('/signup', async (req, res) => {
             name,
             firstname,
             birthdate,
-            avatar: "/images/default.png",
+            avatar: "/images/default.svg",
             username,
             admin: false
         };

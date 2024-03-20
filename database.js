@@ -13,7 +13,7 @@ async function getUserById(userId){
     const db = client.db(dbName);
     const usersCollection = db.collection('users');
     try {
-        return await usersCollection.findOne({_id: new ObjectID(userId)});
+        return await usersCollection.findOne({_id: new ObjectId(userId)});
     }
     catch(err){
         console.error(err);
@@ -58,7 +58,7 @@ async function getUserInfoById(userId){
     const db = client.db(dbName);
     const usersCollection = db.collection('users');
     try {
-        return await usersCollection.findOne({_id: new ObjectID(userId)},{projection: {password: 0}});
+        return await usersCollection.findOne({_id: new ObjectId(userId)},{projection: {password: 0}});
     }
     catch(err){
         console.error(err);
