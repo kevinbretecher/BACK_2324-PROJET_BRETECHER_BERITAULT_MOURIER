@@ -25,12 +25,12 @@ router.post('/login',async (req,res) => {
         }
         const token = jwt.sign({userId: user._id},secret,{expiresIn:'1h'});
         res.cookie('authToken',token,{httpOnly:true,secure:true});
-        res.json({token,user});
+        res.json({ username: user.username });
     }
 });
 
 router.post('/signup', async (req, res) => {
-    const { email, password, name, firstname, birthdate, status, avatar, username } = req.body;
+    const { email, password, name, firstname, birthdate, username } = req.body;
     console.log(req.body);
     try {
         const [existingUserByEmail, existingUserByUsername] = await Promise.all([
@@ -67,7 +67,8 @@ router.post('/signup', async (req, res) => {
         const token = jwt.sign({ userId: createdUser._id }, secret, { expiresIn: '1h' });
 
         // Send the token in the response
-        res.status(201).json({ token });
+        res.status(201).cookie('authToken',token,{httpOnly:true,secure:true});
+        res.json({ username: newUser.username });
     } catch (error) {
         console.error('Error during signup:', error);
         res.status(500).json({ error: 'Internal server error' });
