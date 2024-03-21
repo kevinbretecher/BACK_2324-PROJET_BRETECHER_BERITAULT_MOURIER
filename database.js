@@ -253,4 +253,85 @@ async function addMessage(sender,receiver,content){
     }
 }
 
-module.exports = {getUserById,getUserByEmail,getUserByUsername,getUserInfoById,addUser,editAvatar,getAllEvents,getEventById,addEvent,editEventById,deleteEventById,getEventOwnerById,getAllUsers,getMessagesByUsers,addMessage};
+async function addFavorite(userId,eventId){
+    const client = await clientConnect();
+    const db = client.db(dbName);
+    const favoritesCollection = db.collection('favorites');
+    try {
+        return await favoritesCollection.insertOne({userId,eventId});
+    }
+    catch (err) {
+        console.error(err);
+    }
+    finally {
+        await client.close();
+    }
+}
+
+async function deleteFavorite(userId,eventId){
+    const client = await clientConnect();
+    const db = client.db(dbName);
+    const favoritesCollection = db.collection('favorites');
+    try {
+        return await favoritesCollection.deleteOne({userId,eventId});
+    }
+    catch (err) {
+        console.error(err);
+    }
+    finally {
+        await client.close();
+    }
+}
+
+async function getUserFavoriteEvents(userId) {
+    const client = await clientConnect();
+    const db = client.db(dbName);
+    const favoritesCollection = db.collection('favorites');
+    const eventsCollection = db.collection('events');
+
+    try {
+        const favoriteEvents = await favoritesCollection
+            .find({ userId })
+            .toArray();
+
+        const eventIds = favoriteEvents.map(event => new ObjectId(event.eventId));
+
+        return await eventsCollection
+            .find({ _id: { $in: eventIds } })
+            .toArray();
+    }
+    catch (err) {
+        console.error(err);
+    }
+    finally {
+        await client.close();
+    }
+}
+
+async function getEventFavoritedUsers(eventId) {
+    const client = await clientConnect();
+    const db = client.db(dbName);
+    const favoritesCollection = db.collection('favorites');
+    const usersCollection = db.collection('users');
+
+    try {
+        const favoritedUserIds = await favoritesCollection
+            .find({ eventId })
+            .toArray();
+
+        const userIds = favoritedUserIds.map(user => new ObjectId(user.userId));
+
+        return await usersCollection
+            .find({ _id: { $in: userIds } })
+            .project({ _id: 1, username: 1 })
+            .toArray();
+    }
+    catch (err) {
+        console.error(err);
+    }
+    finally {
+        await client.close();
+    }
+}
+
+module.exports = {getUserById,getUserByEmail,getUserByUsername,getUserInfoById,addUser,editAvatar,getAllEvents,getEventById,addEvent,editEventById,deleteEventById,getEventOwnerById,getAllUsers,getMessagesByUsers,addMessage,addFavorite,deleteFavorite,getUserFavoriteEvents,getEventFavoritedUsers};

@@ -1,9 +1,7 @@
-//events/id , events/new , events/ , events/id/edit, events/id/delete
+//events/id , events/new , events/ , events/id/edit, events/id/delete, events/id/favorite, events/profile
 
 const express = require('express');
 const database = require("../database.js")
-const fs = require('fs');
-const path = require('path');
 const authenticateToken = require("../middlewares/authenticateToken")
 
 const router = express.Router();
@@ -41,7 +39,21 @@ router.post('/new', authenticateToken, async (req, res) => {
 });
 
 router.get('/:id',authenticateToken,async (req,res) => {
-    res.json(await database.getEventById(req.params.id));
+    try {
+        const eventId = req.params.id;
+
+        const [event, favoritedUsers] = await Promise.all([
+            database.getEventById(eventId),
+            database.getEventFavoritedUsers(eventId)
+        ]);
+
+        event.favoritedUsers = favoritedUsers;
+
+        res.json(event);
+    } catch (error) {
+        console.error('Error fetching event:', error);
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 router.post('/:id/edit',authenticateToken,async (req,res) => {
     try {
@@ -86,6 +98,18 @@ router.delete('/:id/delete',authenticateToken,async (req,res) => {
     } catch (error) {
         res.status(500).json({error: 'Internal server error'});
     }
+});
+
+router.get('/:id/favorite',authenticateToken,async (req,res) => {
+    res.json(await database.addFavorite(req.decoded.userId,req.params.id));
+});
+
+router.delete('/:id/favorite',authenticateToken,async (req,res) => {
+    res.json(await database.deleteFavorite(req.decoded.userId,req.params.id));
+});
+
+router.get('/profile',authenticateToken,async (req,res) => {
+    res.json(await database.getUserFavoriteEvents(req.decoded.userId));
 });
 
 module.exports = router;
