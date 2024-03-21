@@ -193,4 +193,64 @@ async function getEventOwnerById(eventId) {
     }
 }
 
-module.exports = {getUserById,getUserByEmail,getUserByUsername,getUserInfoById,addUser,editAvatar,getAllEvents,getEventById,addEvent,editEventById,deleteEventById,getEventOwnerById};
+async function getAllUsers(){
+    const client = await clientConnect()
+    const db = client.db(dbName);
+    const usersCollection = db.collection('users');
+    try {
+        return await usersCollection.find({},{projection: {_id: 1, username: 1, avatar: 1}}).toArray();
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+}
+
+async function getMessagesByUsers(user1,user2){
+    const client = await clientConnect()
+    const db = client.db(dbName);
+    const messagesCollection = db.collection('messages');
+    try {
+        return await messagesCollection.find({
+            $or: [
+                {sender: user1, receiver: user2},
+                {sender: user2, receiver: user1}
+            ]
+        }).sort({ date: 1 }).toArray();
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+}
+
+async function addMessage(sender,receiver,content){
+    const client = await clientConnect()
+    const db = client.db(dbName);
+    const messagesCollection = db.collection('messages');
+    try {
+        const newMessage = {
+            sender,
+            receiver,
+            content,
+            date: new Date()
+        };
+
+        const result = await messagesCollection.insertOne(newMessage);
+        const insertedId = result.insertedId;
+
+        return { _id: insertedId, ...newMessage };
+    }
+    catch(err){
+        console.error(err);
+    }
+    finally{
+        await client.close();
+    }
+}
+
+module.exports = {getUserById,getUserByEmail,getUserByUsername,getUserInfoById,addUser,editAvatar,getAllEvents,getEventById,addEvent,editEventById,deleteEventById,getEventOwnerById,getAllUsers,getMessagesByUsers,addMessage};
