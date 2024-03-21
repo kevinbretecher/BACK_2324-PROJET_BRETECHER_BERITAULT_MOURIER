@@ -151,7 +151,7 @@ async function editEventById(editedEvent){
     const db = client.db(dbName);
     const eventsCollection = db.collection('events');
     try {
-        return await eventsCollection.updateOne({_id: ObjectId(updatedEvent._id)},{$set: updatedEvent});
+        return await eventsCollection.updateOne({_id: new ObjectId(editedEvent._id)},{$set: editedEvent});
     }
     catch (err) {
         console.error(err);

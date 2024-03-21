@@ -48,7 +48,7 @@ router.post('/signup', async (req, res) => {
             password: hashedPassword,
             name,
             firstname,
-            birthdate,
+            birthdate: new Date(birthdate),
             avatar: "/images/users/default.svg",
             username,
             admin: false
@@ -86,7 +86,6 @@ router.post('/profile', authenticateToken,async (req, res) => {
     }
 });
 
-// Function to extract image format from data URI
 function getImageFormat(dataURI) {
     const formatMatch = dataURI.match(/^data:image\/(png|jpeg);base64,/);
     if (formatMatch && formatMatch[1]) {
