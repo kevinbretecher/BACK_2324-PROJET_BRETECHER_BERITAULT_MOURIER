@@ -230,7 +230,7 @@ async function getMessagesByUsers(user1,user2){
     }
 }
 
-async function addMessage(sender,receiver,content){
+async function addMessage(sender,receiver,content,date){
     const client = await clientConnect()
     const db = client.db(dbName);
     const messagesCollection = db.collection('messages');
@@ -239,7 +239,7 @@ async function addMessage(sender,receiver,content){
             sender,
             receiver,
             content,
-            date: new Date()
+            date,
         };
 
         const result = await messagesCollection.insertOne(newMessage);

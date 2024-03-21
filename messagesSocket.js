@@ -36,7 +36,8 @@ const initSocketServer = (server) => {
 
                 const sender = decoded.userId;
                 const { receiver, content } = data;
-                const message = await database.addMessage(sender, receiver, content);
+                const date = new Date();
+                const message = await database.addMessage(sender, receiver, content, date);
 
                 const recipientSocket = connectedUsers[receiver];
                 if (recipientSocket) {
