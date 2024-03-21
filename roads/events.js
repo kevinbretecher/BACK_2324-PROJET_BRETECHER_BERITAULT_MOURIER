@@ -19,11 +19,11 @@ router.post('/',authenticateToken,async (req,res) => {
 
 router.post('/new', authenticateToken, async (req, res) => {
     try {
-        const { name, image, price, date, theme, location } = req.body;
+        const { name, price, date, theme, location } = req.body;
 
         const newEvent = {
             name,
-            image,
+            image: "/images/events/"+theme+".jpg",
             price,
             date: date,
             theme,
