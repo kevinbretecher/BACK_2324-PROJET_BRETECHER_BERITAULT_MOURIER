@@ -6,7 +6,12 @@ const database = require("./database.js");
 const connectedUsers = {};
 
 const initSocketServer = (server) => {
-    const io = new Server(server);
+    const io = new Server(server, {
+        cors: {
+            origin: "http://localhost:4200",
+            methods: ["GET","POST"]
+        }
+    });
 
     io.on('connection', async (socket) => {
         console.log('New client connected');
