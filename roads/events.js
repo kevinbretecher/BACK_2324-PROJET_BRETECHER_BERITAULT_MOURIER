@@ -25,7 +25,7 @@ router.post('/new', authenticateToken, async (req, res) => {
             name,
             image,
             price,
-            date: new Date(date),
+            date: date,
             theme,
             location,
             owner: req.decoded.userId

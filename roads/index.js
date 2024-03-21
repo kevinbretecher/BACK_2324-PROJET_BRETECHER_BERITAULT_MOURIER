@@ -48,7 +48,7 @@ router.post('/signup', async (req, res) => {
             password: hashedPassword,
             name,
             firstname,
-            birthdate: new Date(birthdate),
+            birthdate: birthdate,
             avatar: "/images/users/default.svg",
             username,
             admin: false
@@ -75,10 +75,10 @@ router.post('/profile', authenticateToken,async (req, res) => {
     try {
         const { avatar } = req.body;
         const avatarFileName = `${req.decoded.userId}.${getImageFormat(avatar)}`;
-        const avatarPath = path.join(__dirname, '../public/images/users', avatarFileName);
+        const avatarPath = path.join(__dirname, '../public/images/users/', avatarFileName);
         const base64Data = avatar.replace(/^data:image\/(png|jpeg);base64,/, '');
         fs.writeFileSync(avatarPath, base64Data, 'base64');
-        res.json(await database.editAvatar(req.decoded.userId, "/images/users"+avatarFileName));
+        res.json(await database.editAvatar(req.decoded.userId, "/images/users/"+avatarFileName));
     }
     catch (err) {
         res.status(500).json({ error: 'Internal server error or invalid image format' });
