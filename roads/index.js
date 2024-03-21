@@ -78,7 +78,7 @@ router.post('/profile', authenticateToken,async (req, res) => {
         const avatarPath = path.join(__dirname, '../public/images', avatarFileName);
         const base64Data = avatar.replace(/^data:image\/(png|jpeg);base64,/, '');
         fs.writeFileSync(avatarPath, base64Data, 'base64');
-        res.json(await database.editAvatar(req.decoded.userId, avatarPath));
+        res.json(await database.editAvatar(req.decoded.userId, "/images/"+avatarFileName));
     }
     catch (err) {
         console.error('Error updating avatar:', err);
