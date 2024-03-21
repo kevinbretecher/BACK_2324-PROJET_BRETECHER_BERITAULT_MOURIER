@@ -81,7 +81,6 @@ router.post('/profile', authenticateToken,async (req, res) => {
         res.json(await database.editAvatar(req.decoded.userId, "/images/users"+avatarFileName));
     }
     catch (err) {
-        console.error('Error updating avatar:', err);
         res.status(500).json({ error: 'Internal server error or invalid image format' });
     }
 });

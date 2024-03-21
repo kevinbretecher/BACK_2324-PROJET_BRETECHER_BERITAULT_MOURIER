@@ -151,7 +151,8 @@ async function editEventById(editedEvent){
     const db = client.db(dbName);
     const eventsCollection = db.collection('events');
     try {
-        return await eventsCollection.updateOne({_id: new ObjectId(editedEvent._id)},{$set: editedEvent});
+        const { _id, ...updatedFields } = editedEvent;
+        return await eventsCollection.updateOne({ _id: new ObjectId(_id) },{ $set: updatedFields });
     }
     catch (err) {
         console.error(err);
@@ -181,8 +182,8 @@ async function getEventOwnerById(eventId) {
     const db = client.db(dbName);
     const eventsCollection = db.collection('events');
     try {
-        const event = await eventsCollection.findOne({_id: new ObjectId(eventId)}, {projection: {ownerId: 1, _id: 0 }});
-        return event.ownerId;
+        const event = await eventsCollection.findOne({_id: new ObjectId(eventId)}, {projection: {owner: 1, _id: 0 }});
+        return event.owner;
     }
     catch (err) {
         console.error(err);

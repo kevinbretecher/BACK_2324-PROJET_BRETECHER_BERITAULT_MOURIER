@@ -5,7 +5,6 @@ const database = require("../database.js")
 const fs = require('fs');
 const path = require('path');
 const authenticateToken = require("../middlewares/authenticateToken")
-const { ObjectId } = require('mongodb');
 
 const router = express.Router();
 
@@ -29,7 +28,7 @@ router.post('/new', authenticateToken, async (req, res) => {
             date: new Date(date),
             theme,
             location,
-            owner: new ObjectId(req.decoded.userId)
+            owner: req.decoded.userId
         };
 
         const result = await database.addEvent(newEvent);
@@ -37,13 +36,12 @@ router.post('/new', authenticateToken, async (req, res) => {
         res.status(201).json({ message: 'Event added successfully', eventId: result.insertedId });
     }
     catch (err) {
-        console.error('Error adding event:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 
 router.get('/:id',authenticateToken,async (req,res) => {
-    res.json(database.getEventById(req.params.id));
+    res.json(await database.getEventById(req.params.id));
 });
 router.post('/:id/edit',authenticateToken,async (req,res) => {
     try {
@@ -71,7 +69,6 @@ router.post('/:id/edit',authenticateToken,async (req,res) => {
         }
     }
     catch (err) {
-        console.error('Error editing event:', err);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
@@ -84,10 +81,9 @@ router.delete('/:id/delete',authenticateToken,async (req,res) => {
             await database.deleteEventById(req.params.id);
             res.status(200).json({message: 'Event deleted successfully'});
         } else {
-            res.status(403).json({error: 'Forbidden'});
+            res.status(403).json({error: 'You are not authorized to delete this event'});
         }
     } catch (error) {
-        console.error('Error deleting event:', error);
         res.status(500).json({error: 'Internal server error'});
     }
 });
