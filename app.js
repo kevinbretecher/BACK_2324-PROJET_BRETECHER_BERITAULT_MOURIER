@@ -8,8 +8,8 @@ const morgan = require('morgan');
 const path = require('path');
 
 const bodyParser = require('body-parser');
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
 
 app.use(morgan('tiny'));
 app.use(express.static("public"));
