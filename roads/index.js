@@ -25,7 +25,7 @@ router.post('/login',async (req,res) => {
         }
         const token = jwt.sign({userId: user._id},secret,{expiresIn:'1h'});
         res.cookie('authToken',token,{httpOnly:true,secure:true});
-        res.json({ username: user.username });
+        res.json({username: user.username, token});
     }
 });
 
@@ -56,10 +56,10 @@ router.post('/signup', async (req, res) => {
 
         const createdUser = await database.addUser(newUser);
 
-        const token = jwt.sign({ userId: createdUser._id }, secret, { expiresIn: '1h' });
+        const token = jwt.sign({ userId: createdUser.insertedId }, secret, { expiresIn: '1h' });
 
         res.status(201).cookie('authToken',token,{httpOnly:true,secure:true});
-        res.json({ username: newUser.username });
+        res.json({username: newUser.username , token});
     }
     catch (err) {
         res.status(500).json({ error: 'Internal server error' });
@@ -71,19 +71,30 @@ router.get('/profile',authenticateToken,async (req,res) => {
     res.json(await database.getUserInfoById(userId));
 });
 
-router.post('/profile',authenticateToken,async (req,res) => {
+router.post('/profile', authenticateToken,async (req, res) => {
     try {
-        const {avatar} = req.body;
-        const avatarFileName = `${req.decoded.userId}.png`;
+        const { avatar } = req.body;
+        const avatarFileName = `${req.decoded.userId}.${getImageFormat(avatar)}`;
         const avatarPath = path.join(__dirname, '../public/images', avatarFileName);
-        const base64Data = avatar.replace(/^data:image\/png;base64,/, '');
+        const base64Data = avatar.replace(/^data:image\/(png|jpeg);base64,/, '');
         fs.writeFileSync(avatarPath, base64Data, 'base64');
-        res.json(database.editAvatar(req.decoded.userId, avatarPath));
+        res.json(await database.editAvatar(req.decoded.userId, avatarPath));
     }
     catch (err) {
         console.error('Error updating avatar:', err);
-        res.status(500).json({ error: 'Internal server error' });
+        res.status(500).json({ error: 'Internal server error or invalid image format' });
     }
 });
+
+// Function to extract image format from data URI
+function getImageFormat(dataURI) {
+    const formatMatch = dataURI.match(/^data:image\/(png|jpeg);base64,/);
+    if (formatMatch && formatMatch[1]) {
+        return formatMatch[1];
+    } else {
+        throw new Error('Invalid image format');
+    }
+}
+
 
 module.exports = router;
