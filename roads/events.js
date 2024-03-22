@@ -83,12 +83,12 @@ router.post('/:id/edit',authenticateToken,async (req,res) => {
         const userId = req.decoded.userId;
         const eventOwnerId = await database.getEventOwnerById(req.params.id);
         if (userId === eventOwnerId) {
-            const { name, image, price, date, theme, location } = req.body;
+            const { name, price, date, theme, location } = req.body;
 
             const updatedEvent = {
                 _id: req.params.id,
                 name,
-                image,
+                image: "/images/events/"+theme+".jpg",
                 price,
                 date: date,
                 theme,
