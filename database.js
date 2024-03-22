@@ -116,6 +116,40 @@ async function getAllEvents(){
     }
 }
 
+async function getAllEventsFilterSort(filterOptions = {}, sortOptions = {}) {
+    const client = await clientConnect();
+    const db = client.db(dbName);
+    const eventsCollection = db.collection('events');
+
+    try {
+        const filterCriteria = {};
+
+        if (filterOptions.name) {
+            filterCriteria.name = { $regex: filterOptions.name, $options: 'i' }; //case sensitive
+        }
+        if (filterOptions.minPrice) {
+            filterCriteria.price = { $gte: filterOptions.minPrice };
+        }
+        if (filterOptions.maxPrice) {
+            filterCriteria.price = { ...filterCriteria.price, $lte: filterOptions.maxPrice };
+        }
+        if (filterOptions.theme) {
+            filterCriteria.theme = filterOptions.theme;
+        }
+
+        const events = await eventsCollection.find(filterCriteria)
+            .sort(sortOptions)
+            .toArray();
+
+        return events;
+    } catch (err) {
+        console.error(err);
+    } finally {
+        await client.close();
+    }
+}
+
+
 async function getEventById(eventId){
     const client = await clientConnect()
     const db = client.db(dbName);
@@ -336,4 +370,4 @@ async function getEventFavoritedUsers(eventId) {
     }
 }
 
-module.exports = {getUserById,getUserByEmail,getUserByUsername,getUserInfoById,addUser,editAvatar,getAllEvents,getEventById,addEvent,editEventById,deleteEventById,getEventOwnerById,getAllUsers,getMessagesByUsers,addMessage,addFavorite,deleteFavorite,getUserFavoriteEvents,getEventFavoritedUsers};
+module.exports = {getUserById,getUserByEmail,getUserByUsername,getUserInfoById,addUser,editAvatar,getAllEvents,getAllEventsFilterSort,getEventById,addEvent,editEventById,deleteEventById,getEventOwnerById,getAllUsers,getMessagesByUsers,addMessage,addFavorite,deleteFavorite,getUserFavoriteEvents,getEventFavoritedUsers};

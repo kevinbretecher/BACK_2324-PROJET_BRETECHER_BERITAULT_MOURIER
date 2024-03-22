@@ -67,8 +67,13 @@ router.post('/signup', async (req, res) => {
 });
 
 router.get('/profile',authenticateToken,async (req,res) => {
-    const userId = req.decoded.userId;
-    res.json(await database.getUserInfoById(userId));
+    try {
+        const userId = req.decoded.userId;
+        res.json(await database.getUserInfoById(userId));
+    }
+    catch (err) {
+        res.status(500).json({ error: 'Internal server error' });
+    }
 });
 
 router.post('/profile', authenticateToken,async (req, res) => {
