@@ -171,7 +171,7 @@ async function addEvent(newEvent){
     const eventsCollection = db.collection('events');
     try {
         const result = await eventsCollection.insertOne(newEvent);
-        await addFavorite(newEvent.owner,result.insertedId);
+        await addFavorite(newEvent.owner,result.insertedId.toString());
         return result;
     }
     catch (err) {
