@@ -57,6 +57,9 @@ const initSocketServer = (server) => {
                 socket.emit('messages', messages);
             });
 
+            socket.on('allUsers', async () =>{
+                socket.emit('allUsers', await database.getAllUsers());
+            });
 
             socket.on('disconnect', () => {
                 console.log('Client disconnected');
