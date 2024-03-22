@@ -45,7 +45,7 @@ const initSocketServer = (server) => {
             socket.on('fetchMessages', async (data) => {
                 //returns all the messages between 2 specific users
                 const user1 = decoded.userId;
-                const user2 = { id: data.id };
+                const user2 = data.id;
                 const messages = await database.getMessagesByUsers(user1, user2);
 
                 socket.emit('messages', messages);
