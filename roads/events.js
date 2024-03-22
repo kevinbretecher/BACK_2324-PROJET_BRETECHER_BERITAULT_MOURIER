@@ -74,7 +74,6 @@ router.get('/:id',authenticateToken,async (req,res) => {
         res.json(event);
     }
     catch (error) {
-        console.error('Error fetching event:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });

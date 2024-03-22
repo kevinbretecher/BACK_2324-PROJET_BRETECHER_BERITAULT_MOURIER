@@ -62,7 +62,6 @@ const initSocketServer = (server) => {
         }
         catch (error) {
             //if token check fails, we disconnect the user
-            console.error('Authentication error:', error.message);
             socket.disconnect(true);
         }
     });
