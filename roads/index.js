@@ -13,7 +13,8 @@ const secret = process.env.SECRET
 
 
 router.post('/login',async (req,res) => {
-    const {email, password} = req.body;
+    //checks login and password from request with the dabatase login and hashed password and returns the jwt
+    const { email, password } = req.body;
     const user = await database.getUserByEmail(email);
     if (!user){
         res.status(401).json({ error: 'Invalid email or password' });
@@ -23,13 +24,14 @@ router.post('/login',async (req,res) => {
         if (!passwordMatch) {
             return res.status(401).json({ error: 'Invalid email or password' });
         }
-        const token = jwt.sign({userId: user._id},secret,{expiresIn:'1h'});
-        res.cookie('authToken',token,{httpOnly:true,secure:true});
-        res.json({username: user.username, token});
+        const token = jwt.sign({ userId: user._id },secret,{ expiresIn:'1h' });
+        res.cookie('authToken',token,{ httpOnly: true, secure: true });
+        res.json({ username: user.username, token }); //we return the token also as json because there are issues to retrieve the cookie
     }
 });
 
 router.post('/signup', async (req, res) => {
+    //checks if username or email already exists, builds new users from request, adds to database and returns jwt
     const { email, password, name, firstname, birthdate, username } = req.body;
     try {
         const [existingUserByEmail, existingUserByUsername] = await Promise.all([
@@ -58,8 +60,8 @@ router.post('/signup', async (req, res) => {
 
         const token = jwt.sign({ userId: createdUser.insertedId }, secret, { expiresIn: '1h' });
 
-        res.status(201).cookie('authToken',token,{httpOnly:true,secure:true});
-        res.json({username: newUser.username , token});
+        res.status(201).cookie('authToken',token,{ httpOnly:true, secure:true });
+        res.json({ username: newUser.username , token }); //we return the token also as json because there are issues to retrieve the cookie
     }
     catch (err) {
         res.status(500).json({ error: 'Internal server error' });
@@ -67,6 +69,7 @@ router.post('/signup', async (req, res) => {
 });
 
 router.get('/profile',authenticateToken,async (req,res) => {
+    //returns the user profile
     try {
         const userId = req.decoded.userId;
         res.json(await database.getUserInfoById(userId));
@@ -77,6 +80,7 @@ router.get('/profile',authenticateToken,async (req,res) => {
 });
 
 router.post('/profile', authenticateToken,async (req, res) => {
+    //edits user avatars and stores the new images
     try {
         const { avatar } = req.body;
         const avatarFileName = `${req.decoded.userId}.${getImageFormat(avatar)}`;

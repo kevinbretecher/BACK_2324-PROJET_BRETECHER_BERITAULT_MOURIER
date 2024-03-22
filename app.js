@@ -15,6 +15,7 @@ app.use(morgan('tiny'));
 app.use(express.static("public"));
 app.use(cors());
 
+//mounts index router on / and events router on /events
 const indexRouter = require(path.join(__dirname,"roads/index.js"));
 const eventsRouter = require(path.join(__dirname,"roads/events.js"));
 app.use("/", indexRouter);
@@ -25,9 +26,12 @@ app.use("/events", eventsRouter);
 //});
 
 app.use( (req, res, next) => {
+    //if no route matches error 404
     res.status(404).send('Page not found');
 });
 
+
+//websocket server
 const http = require('http');
 const messagesSocket = require('./messagesSocket'); // Import WebSocket server logic
 const server = http.createServer(app);

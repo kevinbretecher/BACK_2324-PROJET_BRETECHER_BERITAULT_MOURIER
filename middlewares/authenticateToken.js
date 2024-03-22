@@ -2,6 +2,7 @@ const jwt = require('jsonwebtoken');
 const secret = process.env.SECRET
 
 function authenticateToken(req, res, next) {
+    //middleware to check if user provided correct token, if yes puts the payload in req.decoded
     const authHeader = req.header('Authorization');
     const token = authHeader && authHeader.split(' ')[1];
     if (!token) {

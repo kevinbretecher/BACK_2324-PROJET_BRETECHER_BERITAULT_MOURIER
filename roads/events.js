@@ -7,6 +7,7 @@ const authenticateToken = require("../middlewares/authenticateToken")
 const router = express.Router();
 
 router.get('/',authenticateToken,async (req,res) => {
+    //returns all events
     try {
         res.json(await database.getAllEvents());
     }
@@ -16,6 +17,7 @@ router.get('/',authenticateToken,async (req,res) => {
 });
 
 router.post('/',authenticateToken,async (req,res) => {
+    //returns all events with filter and sorting options
     try {
         res.json(await database.getAllEventsFilterSort(req.body.filterOption, req.body.sortOption));
     }
@@ -25,6 +27,7 @@ router.post('/',authenticateToken,async (req,res) => {
 });
 
 router.post('/new', authenticateToken, async (req, res) => {
+    //builds new event from request and adds it to the database
     try {
         const { name, price, date, theme, location } = req.body;
 
@@ -48,6 +51,7 @@ router.post('/new', authenticateToken, async (req, res) => {
 });
 
 router.get('/profile',authenticateToken,async (req,res) => {
+    //returns all the user favorite events
     try {
         res.json(await database.getUserFavoriteEvents(req.decoded.userId));
     }
@@ -57,6 +61,7 @@ router.get('/profile',authenticateToken,async (req,res) => {
 });
 
 router.get('/:id',authenticateToken,async (req,res) => {
+    //returns a specific event info and all the users who added it favorite
     try {
         const eventId = req.params.id;
 
@@ -66,14 +71,15 @@ router.get('/:id',authenticateToken,async (req,res) => {
         ]);
 
         event.favoritedUsers = favoritedUsers;
-
         res.json(event);
-    } catch (error) {
+    }
+    catch (error) {
         console.error('Error fetching event:', error);
         res.status(500).json({ error: 'Internal server error' });
     }
 });
 router.post('/:id/edit',authenticateToken,async (req,res) => {
+    //edits specific event if owner
     try {
         const userId = req.decoded.userId;
         const eventOwnerId = await database.getEventOwnerById(req.params.id);
@@ -104,21 +110,25 @@ router.post('/:id/edit',authenticateToken,async (req,res) => {
 });
 
 router.delete('/:id/delete',authenticateToken,async (req,res) => {
+    //deletes specific event if owner
     const userId = req.decoded.userId;
     try {
         const owner = await database.getEventOwnerById(req.params.id);
         if (owner === userId) {
             await database.deleteEventById(req.params.id);
             res.status(200).json({message: 'Event deleted successfully'});
-        } else {
+        }
+        else {
             res.status(403).json({error: 'You are not authorized to delete this event'});
         }
-    } catch (error) {
+    }
+    catch (error) {
         res.status(500).json({error: 'Internal server error'});
     }
 });
 
 router.get('/:id/favorite',authenticateToken,async (req,res) => {
+    //marks specific event as favorite
     try {
         res.json(await database.addFavorite(req.decoded.userId, req.params.id));
     }
@@ -128,6 +138,7 @@ router.get('/:id/favorite',authenticateToken,async (req,res) => {
 });
 
 router.delete('/:id/favorite',authenticateToken,async (req,res) => {
+    //removes specific event from favorite
     try {
         res.json(await database.deleteFavorite(req.decoded.userId, req.params.id));
     }
